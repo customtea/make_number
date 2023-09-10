@@ -5,7 +5,7 @@ import typing
 from enum import Enum
 
 __author__ = 'Github @customtea'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 
 class Operator(Enum):
@@ -28,6 +28,12 @@ class RPNCalc():
     def __init__(self) -> None:
         self.__stack: typing.List[Fraction] = []
         self.__formula: typing.List[str] = []
+
+    def reset(self) -> None:
+        """Reset Stack
+        """
+        self.__stack.clear()
+        self.__formula.clear()
     
     def __push_num(self, num: Fraction) -> None:
         self.__stack.append(num)
@@ -37,12 +43,6 @@ class RPNCalc():
         num2 = self.__stack.pop()
         num1 = self.__stack.pop()
         return num1, num2
-
-    def reset(self) -> None:
-        """Reset Stack
-        """
-        self.__stack.clear()
-        self.__formula.clear()
     
     def __plus(self) ->None:
         num1, num2 = self.__pre_calc()
@@ -93,6 +93,29 @@ class RPNCalc():
             後置記法を出力する
         """
         return " ".join(self.__formula)
+    
+    def infix_formula(self) -> str:
+        tmp_stack = []
+        for op in self.__formula:
+            if op == "+":
+                f2 = tmp_stack.pop()
+                f1 = tmp_stack.pop()
+                tmp_stack.append(f"({f1} + {f2})")
+            elif op == "-":
+                f2 = tmp_stack.pop()
+                f1 = tmp_stack.pop()
+                tmp_stack.append(f"({f1} - {f2})")
+            elif op == "*":
+                f2 = tmp_stack.pop()
+                f1 = tmp_stack.pop()
+                tmp_stack.append(f"{f1} * {f2}")
+            elif op == "/":
+                f2 = tmp_stack.pop()
+                f1 = tmp_stack.pop()
+                tmp_stack.append(f"{f1} / {f2}")
+            else:
+                tmp_stack.append(str(op))
+        return tmp_stack[0]
 
     def push(self, op: typing.Union[Operator, Fraction]) -> None:
         """push calculation
@@ -236,6 +259,7 @@ def solve2nd(targetnum: Fraction, numlist: typing.List[Fraction]):
                 continue
             if targetnum == res:
                 print(f"RESULT TYPE1:    {rpn.postfix_formula()}")
+                print(f"RESULT TYPE1:    {rpn.infix_formula()}")
                 exit(0)
 
         if len(numlist) % 2 == 0:
@@ -256,6 +280,7 @@ def solve2nd(targetnum: Fraction, numlist: typing.List[Fraction]):
                     continue
                 if targetnum == res:
                     print(f"RESULT TYPE2-1:    {rpn.postfix_formula()}")
+                    print(f"RESULT TYPE2-1:    {rpn.infix_formula()}")
                     exit(0)
         else:
             for op in product(opl, repeat=size_number - 1):
@@ -277,6 +302,7 @@ def solve2nd(targetnum: Fraction, numlist: typing.List[Fraction]):
                     continue
                 if targetnum == res:
                     print(f"RESULT TYPE2-2:    {rpn.postfix_formula()}")
+                    print(f"RESULT TYPE2-2:    {rpn.infix_formula()}")
                     exit(0)
 
         for op in product(opl, repeat=size_number - 1):
@@ -296,21 +322,20 @@ def solve2nd(targetnum: Fraction, numlist: typing.List[Fraction]):
                 continue
             if targetnum == res:
                 print(f"RESULT TYPE3:    {rpn.postfix_formula()}")
+                print(f"RESULT TYPE3:    {rpn.infix_formula()}")
                 exit(0)
 
 
 if __name__ == '__main__':
-    # in_list = sys.argv[1:]
-    # in_list = list(map(Fraction, in_list))
-    # target = in_list.pop(-1)
-    # main(target, in_list)
+    if len(sys.argv) >= 2:
+        tl = sys.argv[1:]
+    else:
+        tl = input("> ")
+        tl = tl.split(" ")
+        tl = [s for s in tl if s != ""]
 
-    tl = input("> ")
-    tl = tl.split(" ")
-    tl = [s for s in tl if s != ""]
     in_list = list(map(Fraction, tl))
     target = in_list.pop(-1)
     print(f"Q. {tl[:-1]} = {target}")
-
     solve2nd(target, in_list)
     print("Case Failed")
